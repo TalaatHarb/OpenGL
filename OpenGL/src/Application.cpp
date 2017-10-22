@@ -36,15 +36,17 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	/* Build vertex buffer */
-	//float posistions[6] = {
-	//	-0.5f, -0.5f,
-	//	 0.0f,  0.5f,
-	//	 0.5f, -0.5f
-	//};
-	//unsigned int vBuffer;
-	//glGenBuffers(1, &vBuffer);
-	//glBindBuffer(GL_ARRAY_BUFFER, vBuffer);
-	//glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), posistions, GL_STATIC_DRAW);
+	float posistions[6] = {
+		-0.5f, -0.5f,
+		 0.0f,  0.5f,
+		 0.5f, -0.5f
+	};
+	unsigned int vBuffer;
+	glGenBuffers(1, &vBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vBuffer);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), posistions, GL_STATIC_DRAW);
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -53,14 +55,14 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// Test code
-		glBegin(GL_TRIANGLES);
-		glVertex2f(-0.5f, -0.5f);
-		glVertex2f(0.0f, 0.5f);
-		glVertex2f(0.5f, -0.5f);
-		glEnd();
+		//glBegin(GL_TRIANGLES);
+		//glVertex2f(-0.5f, -0.5f);
+		//glVertex2f(0.0f, 0.5f);
+		//glVertex2f(0.5f, -0.5f);
+		//glEnd();
 
 		/* Rendering using vertex buffer */
-		// glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
