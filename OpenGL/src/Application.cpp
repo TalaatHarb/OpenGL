@@ -6,6 +6,46 @@
 #define WIDTH 800
 #define HEIGHT 600
 
+static unsigned int CompileShader(unsigned int type, std::string &source)
+{
+	unsigned int shaderId = glCreateShader(type);
+	const char* src = source.c_str();
+	glShaderSource(shaderId, 1, &src, nullptr);
+	glCompileShader(shaderId);
+
+	// Error handling
+	int result;
+	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result);
+	if (result == GL_FALSE)
+	{
+		int length;
+		glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &length);
+		char* message = (char*)alloca(length * sizeof(char));
+		glGetShaderInfoLog(shaderId, length, &length, message);
+		std::cout << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex":"fragment") << " shader!" << std::endl;
+		std::cout << message << std::endl;
+		glDeleteShader(shaderId);
+		return 0;
+	}
+
+	return shaderId;
+}
+
+static unsigned int CreateShader(std::string &vertexShader, std::string &fragmentShader) 
+{
+	unsigned int program = glCreateProgram();
+	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
+	unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
+
+	glAttachShader(program, vs);
+	glAttachShader(program, fs);
+
+	glLinkProgram(program);
+	glValidateProgram(program);
+
+	return program;
+}
+
 int main(void)
 {
 	GLFWwindow* window;
@@ -44,9 +84,30 @@ int main(void)
 	unsigned int vBuffer;
 	glGenBuffers(1, &vBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vBuffer);
+	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), posistions, GL_STATIC_DRAW);
+
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), posistions, GL_STATIC_DRAW);
+	
+	/* Creating shader */
+	std::string vertexShader =
+		"#version 330 core\n"
+		"layout(location = 0) in vec4 position;\n"
+		"void main()\n"
+		"{\n"
+		"\tgl_Position = position;\n"
+		"}\n";
+	std::string fragmentShader =
+		"#version 330 core\n"
+		"layout(location = 0) out vec4 color;\n"
+		"void main()\n"
+		"{\n"
+		"\tcolor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+		"}\n";
+	unsigned int shader = CreateShader(vertexShader, fragmentShader);
+
+	/* Using the shader */
+	glUseProgram(shader);
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -70,6 +131,8 @@ int main(void)
 		/* Poll for and process events */
 		glfwPollEvents();
 	}
+
+	glDeleteProgram(shader);
 
 	glfwTerminate();
 	return 0;
