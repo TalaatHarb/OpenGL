@@ -9,6 +9,31 @@
 #define WIDTH 800
 #define HEIGHT 600
 
+#define ASSERT(x) if(!(x)) __debugbreak();
+#define GLCall(x)	GLClearError();\
+					x;\
+					ASSERT(GLCallLog(#x, __FILE__, __LINE__))
+
+static void GLClearError()
+{
+	while (glGetError() != GL_NO_ERROR);
+}
+
+static bool GLCallLog(const char* function, const char* file, int line)
+{
+	if (GLenum error = glGetError())
+	{
+		std::cout << "[OpenGL error] (" << error << ")" << " " << function << " -> " << file << ":" << line << std::endl;
+		while(error = glGetError())
+			std::cout << "[OpenGL error] (" << error << ")" << " " << function << " -> " << file << ":" << line << std::endl;
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
 struct ShaderProgramSources
 {
 	std::string VertexSource;
@@ -156,7 +181,7 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		/* Rendering using vertex buffer */
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr));
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
