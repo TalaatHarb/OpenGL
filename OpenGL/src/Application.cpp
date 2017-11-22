@@ -9,7 +9,9 @@
 #define WIDTH 800
 #define HEIGHT 600
 
+// Compiler dependent assertion macro
 #define ASSERT(x) if(!(x)) __debugbreak();
+
 #define GLCall(x)	GLClearError();\
 					x;\
 					ASSERT(GLCallLog(#x, __FILE__, __LINE__))
@@ -138,6 +140,9 @@ int main(void)
 	if (glewInit() != GLEW_OK)
 		return -1;
 
+	/* Enabling V-Sync */
+	glfwSwapInterval(1);
+
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	/* Build vertex buffer */
@@ -174,14 +179,30 @@ int main(void)
 	/* Using the shader */
 	glUseProgram(shader);
 
+	/* Setting uniforms */
+	GLCall(int uniformLocation = glGetUniformLocation(shader, "u_Color"));
+	ASSERT(uniformLocation != -1);
+	GLCall(glUniform4f(uniformLocation, 0.2f, 0.3f, 0.8f, 1.0f));
+
+	float r = 0.0f;
+	float increment = 0.05f;
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
 		/* Render here */
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		/* Setting Uniforms */
+		GLCall(glUniform4f(uniformLocation, r, 0.3f, 0.8f, 1.0f));
+
 		/* Rendering using vertex buffer */
-		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr));
+		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+		/* Animate the color */
+		if (r > 1.0 || r < 0.0)
+			increment = -increment;
+		r += increment;
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
