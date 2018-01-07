@@ -12,6 +12,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 struct ShaderProgramSources
 {
@@ -136,16 +137,16 @@ int main(void)
 		};
 
 		// Vertex array object
-		unsigned int vArrayObject;
-		GLCall(glGenVertexArrays(1, &vArrayObject));
-		GLCall(glBindVertexArray(vArrayObject));
+		VertexArray vArrayObject;
 
 		// Vertex buffer
 		VertexBuffer vBuffer(posistions, 4 * 2 * sizeof(float));
 
 		// Vertex buffer layout using attributes
-		GLCall(glEnableVertexAttribArray(0));
-		GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+		VertexBufferLayout vBufferLayout;
+		vBufferLayout.Push<float>(2);
+
+		vArrayObject.AddBuffer(vBuffer, vBufferLayout);
 
 		// Index buffer object
 		IndexBuffer iBufferObject(indices, 6);
@@ -180,7 +181,7 @@ int main(void)
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			// Bind
-			GLCall(glBindVertexArray(vArrayObject));
+			vArrayObject.Bind();
 			iBufferObject.Bind();
 			GLCall(glUseProgram(shader));
 
@@ -193,7 +194,7 @@ int main(void)
 			// Unbind
 			GLCall(glUseProgram(0));
 			iBufferObject.UnBind();
-			GLCall(glBindVertexArray(0));
+			vArrayObject.UnBind();
 
 			/* Animate the color */
 			if (r > 1.0 || r < 0.0)
